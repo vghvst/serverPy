@@ -1,4 +1,4 @@
-g4f
+g4f[all]
 fastapi
 uvicorn
 python-multipart
