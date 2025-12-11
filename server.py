@@ -1,10 +1,33 @@
-import os
-import g4f
-from g4f.api import run_api
+from fastapi import FastAPI
+from pydantic import BaseModel
+from g4f import ChatCompletion
+from g4f.Provider import FreeGPT
 
-g4f.Provider.ProviderList.pop("PuterJS", None)
+app = FastAPI()
 
-port = int(os.environ.get("PORT", 8080))
-run_api(host="0.0.0.0", port=port)
+class CompletionRequest(BaseModel):
+    model: str
+    messages: list
 
+@app.post("/v1/chat/completions")
+async def chat(request: CompletionRequest):
+    # Беремо повідомлення користувача
+    messages = request.messages
 
+    # Генеруємо відповідь тільки через FreeGPT
+    result = ChatCompletion.create(
+        model=request.model,
+        provider=FreeGPT,  # фіксований провайдер
+        messages=messages
+    )
+
+    # Повертаємо у форматі OpenAI
+    return {
+        "choices": [
+            {
+                "message": {
+                    "content": result
+                }
+            }
+        ]
+    }
